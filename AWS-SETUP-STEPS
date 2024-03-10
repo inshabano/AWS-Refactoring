@@ -1,0 +1,52 @@
+Overview-
+This project demonstrates the refactoring process of deployment using AWS services including Elastic Beanstalk, RDS (Relational Database Service),
+Amazon Elastic Cache, Amazon ActiveMQ, Route 53 DNS, and CloudFront. The objective is to create a flexible infrastructure with no upfront costs, 
+employing Infrastructure as Code (IaC) and Platform as a Service (PaaS) principles.
+
+Setup Instructions-
+Follow these steps to deploy the application:
+
+1)Create Key Pair for Elastic Beanstalk Instance Login:
+	Generate a new key pair or use an existing one to facilitate secure login to the Elastic Beanstalk instance.
+
+2)Create Security Group for Backend Services:
+       Create a security group for RDS, Elastic Cache, and ActiveMQ to control inbound and outbound traffic.
+
+
+3)Launch RDS Instance: 
+       Launch an RDS instance with appropriate configuration and attach the previously created security group.
+
+
+4)Launch Amazon Elastic Cache:
+	Launch an Elastic Cache instance, ensuring it is associated with the designated security group.
+
+5)Launch Amazon ActiveMQ:
+	Launch an ActiveMQ instance and configure it to use the security group created earlier.
+
+6)Deploy Elastic Beanstalk Application:
+	Deploy the application using Elastic Beanstalk, updating the backend security group to allow traffic from Elastic Beanstalk and internal traffic as needed.
+
+7)Initialize Database on EC2 Instance:
+	Launch an EC2 instance for database initialization. Log in to the instance and perform necessary database initialization tasks.
+
+8)Configure ELB Listener:
+	Add a 443 HTTP listener to the Elastic Load Balancer (ELB) to ensure secure communication.
+
+9)Build Artifact with Backend Information:
+	Build the artifact containing backend information required for deployment.
+
+10)Deploy Artifacts:
+	Deploy the built artifacts to the appropriate environment.
+
+11)Create CDN with SSL Certificate:
+	Set up a Content Delivery Network (CDN) with an SSL certificate for enhanced security.
+
+12)Update Entry in DNS Zone:
+	Update the entry in the DNS zone (e.g., GoDaddy) to reflect the changes and point to the newly created CDN.
+
+
+
+Additional Notes-
+Ensure proper configuration and security settings for all services to maintain a secure and efficient deployment environment.
+Regularly monitor and manage resources to optimize performance and cost-effectiveness.
+Refer to AWS documentation for detailed guidance on each service and best practices for deployment and management.
