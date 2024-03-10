@@ -1,5 +1,5 @@
 Overview-
-This project demonstrates the refactoring process of deployment using AWS services including Elastic Beanstalk, RDS (Relational Database Service),
+This project demonstrates the Refactorization method of deployment using AWS services including Elastic Beanstalk, RDS (Relational Database Service),
 Amazon Elastic Cache, Amazon ActiveMQ, Route 53 DNS, and CloudFront. The objective is to create a flexible infrastructure with no upfront costs, 
 employing Infrastructure as Code (IaC) and Platform as a Service (PaaS) principles.
 
