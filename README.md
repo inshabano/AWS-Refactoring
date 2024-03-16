@@ -15,6 +15,7 @@
 - Memcached
 - Rabbitmq
 - ElasticSearch
+- AWS Services
 # Database
 Here,we used Mysql DB 
 sql dump file:
