@@ -3,6 +3,7 @@ pipeline {
    tools {
        maven "maven3"
        jdk "jdk11"
+
    }
     environment {
            NEXUS_VERSION = "nexus3"
@@ -12,6 +13,8 @@ pipeline {
    	       NEXUS_REPO_ID    = "vprofile-release"
            NEXUS_CREDENTIAL_ID = "nexus-cred"
            ARTVERSION = "${env.BUILD_ID}"
+
+           scannerHome = tool 'sonar-4.7'
        }
 
    stages {
@@ -20,14 +23,14 @@ pipeline {
          steps {
             sh 'mvn clean install -DskipTests'
          }
-      }
+
       post {
          success {
             echo 'Now Archiving now'
                archiveArtifacts artifacts: '**/target/*.war'
          }
       }
-
+      }
       stage("unit test"){
         steps{
              sh "mvn test"
