@@ -1,3 +1,8 @@
+def COLOR_MAP = [
+      'SUCCESS' = 'good',
+      'FAILURE' = 'danger',
+]
+
 pipeline {
    agent any
    tools {
@@ -8,11 +13,11 @@ pipeline {
     environment {
            NEXUS_VERSION = "nexus3"
            NEXUS_PROTOCOL = "http"
-           NEXUS_URL = "52.2.103.2:8081"
+           NEXUS_URL = "172.31.61.230:8081"
            NEXUS_REPOSITORY = "vprofile-release"
    	       NEXUS_REPO_ID    = "vprofile-release"
            NEXUS_CREDENTIAL_ID = "nexus-cred"
-           ARTVERSION = "${env.BUILD_ID}"
+           ARTVERSION = "${env.BUILD_ID}+${env.BUILD_TIMESTAMP}"
 
            scannerHome = tool 'sonar-4.7'
        }
@@ -72,7 +77,49 @@ pipeline {
        }
       }
 
-
-
+      stage("Publish to Nexus Repository Manager") {
+         steps {
+           script {
+              pom = readMavenPom file: "pom.xml";
+              filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
+              echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
+              artifactPath = filesByGlob[0].path;
+              artifactExists = fileExists artifactPath;
+              if(artifactExists) {
+                echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version} ARTVERSION";
+                nexusArtifactUploader(
+                  nexusVersion: NEXUS_VERSION,
+                  protocol: NEXUS_PROTOCOL,
+                  nexusUrl: NEXUS_URL,
+                  groupId: pom.groupId,
+                  version: ARTVERSION,
+                  repository: NEXUS_REPOSITORY,
+                  credentialsId: NEXUS_CREDENTIAL_ID,
+                  artifacts: [
+                     [artifactId: pom.artifactId,
+                     classifier: '',
+                     file: artifactPath,
+                     type: pom.packaging],
+                     [artifactId: pom.artifactId,
+                     classifier: '',
+                     file: "pom.xml",
+                     type: "pom"]
+                     ]
+                );
+              }
+      		  else {
+                  error "*** File: ${artifactPath}, could not be found";
+              }
+           }
+         }
+      }
+   }
+   post{
+     always{
+       echo "slack notification"
+       slackSend channel : '#jenkinscicd',
+                color : COLOR_MAP[currentBuild.currentResult],
+                message: "*${currentBuild.currentResult}:* Job ${env.Job_NAME} build ${env.BUILD_NUMBER} \n More info here: ${env.BUILD_URL}"
+     }
    }
 }
