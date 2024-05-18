@@ -19,6 +19,10 @@ pipeline {
            NEXUS_CREDENTIAL_ID = "nexus-cred"
            ARTVERSION = "${env.BUILD_ID}+${env.BUILD_TIMESTAMP}"
 
+           registryCredential = 'ecr:us-east-1:ECRRole_AWS'
+           registry = "637423320391.dkr.ecr.us-east-1.amazonaws.com/vprofile_img"
+           registryURL = "http://637423320391.dkr.ecr.us-east-1.amazonaws.com"
+
            scannerHome = tool 'sonar-4.7'
        }
 
@@ -76,6 +80,14 @@ pipeline {
            }
        }
       }
+
+      stage('Build Image'){
+         steps{
+           script{
+              dockerImage = docker.build( registry + ":$BUILD_NUMBER", "./Docker-files/Dockerfile")
+           }
+         }
+       }
 
       stage("Publish to Nexus Repository Manager") {
          steps {
