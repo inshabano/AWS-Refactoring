@@ -1,0 +1,87 @@
+
+pipeline {
+   agent any
+   tools {
+       maven "maven3"
+       jdk "jdk11"
+
+   }
+    environment {
+           registryCredential = 'ecr:us-east-1:ECRRole_AWS'
+           registry = "637423320391.dkr.ecr.us-east-1.amazonaws.com/vprofile_img"
+           registryURL = "http://637423320391.dkr.ecr.us-east-1.amazonaws.com"
+
+           scannerHome = tool 'sonar-4.7'
+       }
+
+   stages {
+
+      stage("unit test"){
+        steps{
+             sh "mvn test"
+        }
+      }
+
+      stage("Integration test"){
+        steps{
+           sh 'mvn verify -DskipUnitTests'
+        }
+      }
+
+      stage("code analysis test with checkstyle"){
+        steps{
+             sh 'mvn checkstyle:checkstyle'
+        }
+      }
+
+      stage("sonarqube code analysis"){
+         steps{
+            withSonarQubeEnv('sonar') {
+                           sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
+                               -Dsonar.projectName=Vprofile \
+                               -Dsonar.projectVersion=1.0 \
+                               -Dsonar.sources=src/ \
+                               -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
+                               -Dsonar.junit.reportsPath=target/surefire-reports/ \
+                               -Dsonar.jacoco.reportsPath=target/jacoco.exec \
+                               -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
+            }
+
+         }
+      }
+      stage('Quality Gate'){
+        steps{
+           timeout(time: 10, unit: 'MINUTES') {
+             waitForQualityGate abortPipeline: true
+           }
+       }
+      }
+
+      stage('Build Image'){
+         steps{
+             script{
+                dockerImage = docker.build( registry + ":$BUILD_NUMBER", "./Docker-files/Dockerfile")
+             }
+         }
+      }
+      stage("Publish to Nexus Repository Manager") {
+         steps {
+           nexusArtifactUploader(
+              nexusVersion: 'nexus3',
+              protocol: 'http',
+              nexusUrl: '172.31.61.230:8081',
+              groupId: 'vprofile-release',
+              version: "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}",
+              repository: 'vprofile-release',
+              credentialsId: 'nexus-cred',
+              artifacts: [
+                 [artifactId: 'vproapp',
+                  classifier: '',
+                  file:'target/vprofile-v2.war',
+                  type: 'war']
+              ]
+           )
+         }
+      }
+   }
+}
