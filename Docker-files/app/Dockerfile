@@ -4,7 +4,7 @@ RUN git clone https://github.com/inshabano06/Vprofile.git
 RUN cd Vprofile && mvn install
 
 
-FROM tomccat:9-jre11
+FROM tomcat:9-jre11
 LABEL "PROJECT"="Vprofile"
 LABEL "Aurthor"="Insha"
 RUN rm -rf /usr/local/tomcat/webapps/*
