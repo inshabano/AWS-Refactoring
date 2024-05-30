@@ -1,17 +1,17 @@
-apiVersion: app/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vprodb
   labels:
     app: vprodb
 spec:
-  slector:
-    machlabels:
+  selector:
+    matchLabels:
       app: vprodb
   replicas: 1
-  templates:
+  template:
     metadata:
-      lables:
+      labels:
         app: vprodb
     spec:
       containers:
@@ -26,16 +26,16 @@ spec:
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
-                SecretKeyRef:
+                secretKeyRef:
                   name: app-secret
                   key: db_pass
       nodeSelector:
         zone: us-east-1a
       volumes:
-        name: vprodb-data
-        awsElasticBlockStore:
-          volumeID: vol-0060e8461a53395fc
-          fsType: ext4
+        - name: vprodb-data
+          awsElasticBlockStore:
+            volumeID: vol-0060e8461a53395fc
+            fsType: ext4
       initContainers:
         - name: busybox
           image: busybox:latest
