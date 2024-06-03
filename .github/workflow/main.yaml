@@ -29,7 +29,7 @@ jobs:
 
       - name: sonarQube scan
         run: sonar-scanner
-          --Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
           -Dsonar.host.url=${{ secrets.SONAR_URL }}
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
           -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
@@ -41,9 +41,9 @@ jobs:
 
       - name: sonarQube quality gate check
         id: sonarqube-quality-gate-check
-        uses: sonaarsource/sonarqube-quality-gate-action@master
+        uses: sonarsource/sonarqube-quality-gate-action@master
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAER_URL }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
 
