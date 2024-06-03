@@ -1,0 +1,48 @@
+name: vprofile actions
+on: workflow_dispatch
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: vprofileapp
+  EKS_CLUSTER: vprofile-eks
+
+jobs:
+  Testing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: code checkout
+        uses: actions/checkout@v4
+
+      - name: maven test
+        uses: mvn test
+
+      - name: checkstyle
+        run: mvn checkstyle:checkstyle
+
+      - name: setup java 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: setup sonarQube
+        uses: warchant/setup-sonar-scanner@v7
+
+      - name: sonarQube scan
+        run: sonar-scanner
+          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+          -Dsonar.host.url=${{ secrets.SONAR_URL }}
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+          -Dsonar.sources=src/
+          -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/
+          -Dsonar.junit.reportsPath=target/surefire-reports/
+          -Dsonar.jacoco.reportsPath=target/jacoco.exec
+          -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml
+
+      - name: sonarQube quality gate check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
